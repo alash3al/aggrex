@@ -75,7 +75,7 @@ var headers = resp.headers
 var size = resp.size
 var body = resp.body
 
-// you must set the exports variable, because this is the main var used as a response
+// you must fill the exports variable, because this is the main var used as a response
 exports.example = body
 ```
 
@@ -85,4 +85,4 @@ Any contribution/suggestion is welcomed
 
 Author
 =========
-I'm (Mohammed Al Ashaal)[http://github.com/alash3al], a Gopher ;)
+I'm [Mohammed Al Ashaal](http://github.com/alash3al), a Gopher ;)
