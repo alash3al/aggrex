@@ -14,10 +14,10 @@ var exports = {
 ```
 Features
 ========
-1- Using a simple `javascript` interpreter to execute your requests
-2- Using the (`underscore.js`)[http://underscorejs.org] library for helper functions
-3- Lightweight & High concurrent request dispatcher
-4- Built using `Golang`
+- Using a simple `javascript` interpreter to execute your requests
+- Using the (`underscore.js`)[http://underscorejs.org] library for helper functions
+- Lightweight & High concurrent request dispatcher
+- Built using `Golang`
 
 Why
 ====
