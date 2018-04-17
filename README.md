@@ -59,7 +59,7 @@ Javascript API
 ==============
 > as well as the basic javascript keywords/objects there are two things `request()` and `_` (underscore)
 
-#### #request(options)
+#### # `request(options)`
 ```javascript
 var resp = request({
     url: "http://localhost",    // the url
