@@ -52,7 +52,7 @@ Usage of aggrex:
 
 #### Example
 ```bash
-➜  ~ curl -d 'exports.example = request({url: 'http://country.io/names.json'})'
+➜  ~ curl -d 'exports.example = request({url: 'http://country.io/names.json'})' localhost:6030
 ```
 
 Javascript API
