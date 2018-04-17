@@ -15,7 +15,7 @@ var exports = {
 Features
 ========
 - Using a simple `javascript` interpreter to execute your requests
-- Using the (`underscore.js`)[http://underscorejs.org] library for helper functions
+- Using the [`underscore.js`](http://underscorejs.org) library for helper functions
 - Lightweight & High concurrent request dispatcher
 - Built using `Golang`
 
