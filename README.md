@@ -81,7 +81,7 @@ exports.example = body
 
 Contribution
 ============
-Any contribution/suggestion is welcomed
+You are welcomed :)
 
 Author
 =========
