@@ -81,7 +81,7 @@ exports.example = body
 
 Contribution
 ============
-You are welcomed :)
+Weclome :)
 
 Author
 =========
