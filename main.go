@@ -44,7 +44,27 @@ func main() {
 			res.Write([]byte(`{"success": false, "error": "` + err.Error() + `"}`))
 			return
 		}
-		value, err := execJS(string(body), *flagMaxExecTime)
+		queryParams := map[string]string{}
+		for k, v := range req.URL.Query() {
+			if len(v) < 1 {
+				continue
+			}
+			queryParams[k] = v[0]
+		}
+		headers := map[string]string{}
+		for k, v := range req.Header {
+			if len(v) < 1 {
+				continue
+			}
+			headers[k] = v[0]
+		}
+		value, err := execJS(string(body), *flagMaxExecTime, map[string]interface{}{
+			"req": map[string]interface{}{
+				"uri":     req.URL.RequestURI(),
+				"query":   queryParams,
+				"headers": headers,
+			},
+		})
 		if err != nil {
 			res.Write([]byte(`{"success": false, "error": "` + err.Error() + `"}`))
 			return
@@ -68,9 +88,11 @@ func main() {
 }
 
 // exec the specified js script
-func execJS(script string, maxTime int64) (otto.Value, error) {
+func execJS(script string, maxTime int64, vars map[string]interface{}) (otto.Value, error) {
 	vm := otto.New()
 	vm.Interrupt = make(chan func(), 1)
+
+	vm.Set("context", vars)
 	vm.Set("exports", map[string]interface{}{})
 	vm.Set("request", jsFunctionRequest)
 
