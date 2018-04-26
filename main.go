@@ -12,6 +12,8 @@ import (
 func main() {
 	globals.PopulateGlobals()
 
+	log.Println("[AdminToken]", *globals.FlagAdminToken)
+
 	log.Println("[DB]", "Initializing the database ...")
 	dbh, err := db.Open(*globals.FlagIndexName)
 	if err != nil {

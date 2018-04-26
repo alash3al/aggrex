@@ -4,8 +4,8 @@ AggreX
 
 ```bash
 curl -d "\
-var continent = request({url: 'http://country.io/continent.json'}); \
-var names = request({url: 'http://country.io/names.json'}); \
+var continent = fetch({url: 'http://country.io/continent.json'}); \
+var names = fetch({url: 'http://country.io/names.json'}); \
 var exports = {
 	c: continent.body,
 	n: names.body
@@ -17,6 +17,8 @@ Features
 ========
 - Using a simple `javascript` interpreter to execute your requests
 - Using the [`underscore.js`](http://underscorejs.org) library for helper functions
+- Stored procedures`!`
+- Procedures search engine`!`
 - Lightweight & High concurrent request dispatcher
 - Built using `Golang`
 
@@ -35,14 +37,18 @@ Usage
 ```bash
 ➜  ~ aggrex -h
 Usage of aggrex:
+  -admin-token string
+        the admin secret token (default "bbh42d0186vj9c87qdc0")
   -allowed-hosts all are allowed
-    	the allowed hosts, empty means all are allowed
+        the allowed hosts, empty means all are allowed
   -http string
-    	the http listen address (default ":6030")
+        the http listen address (default ":6030")
+  -index string
+        the database index (default "/home/alash3al/.aggrex")
   -max-body-size int
-    	max body size in MB (default 2)
+        max body size in MB (default 2)
   -max-exec-time int
-    	max execution time of each script in seconds (default 5)
+        max execution time of each script in seconds (default 5)
 
 ```
 
@@ -53,16 +59,16 @@ Usage of aggrex:
 
 #### Example
 ```bash
-➜  ~ curl -d "exports.example = request({url: 'http://country.io/names.json'})" localhost:6030
+➜  ~ curl -d "exports.example = fetch({url: 'http://country.io/names.json'})" localhost:6030
 ```
 
 Javascript API
 ==============
-> as well as the basic javascript keywords/objects there are two things `request()` and `_` (underscore)
+> as well as the basic javascript keywords/objects there are two things `fetch()` and `_` (underscore)
 
-#### # `request(options)`
+#### # `fetch(options)`
 ```javascript
-var resp = request({
+var resp = fetch({
     url: "http://localhost",    // the url
     method: "GET",              // the http method
     headers: {                  // the request headers
@@ -79,6 +85,10 @@ var body = resp.body
 // you must fill the exports variable, because this is the main var used as a response
 exports.example = body
 ```
+
+RESTful API [![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/dac8c42fcce004c6c7e8)
+=============
+> Goto the postman [documenter]](https://documenter.getpostman.com/view/2408647/aggrex/RW1aJfJ8)
 
 Contribution
 ============
