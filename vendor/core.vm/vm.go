@@ -84,8 +84,8 @@ func (v *VM) Exec(script string) (interface{}, error) {
 
 // funcFetch .
 func (v *VM) funcFetch(args map[string]interface{}) map[string]interface{} {
-	var target, method string
-	var headers map[string]string
+	target, method := "", ""
+	headers := map[string]string{}
 
 	if args["url"] == nil {
 		return nil
@@ -108,7 +108,10 @@ func (v *VM) funcFetch(args map[string]interface{}) map[string]interface{} {
 	}
 
 	if args["headers"] != nil {
-		headers = args["headers"].(map[string]string)
+		hdrs := args["headers"].(map[string]interface{})
+		for k, v := range hdrs {
+			headers[k] = v.(string)
+		}
 	}
 
 	body := args["body"]

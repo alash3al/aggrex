@@ -20,7 +20,7 @@ func Serve(addr string) error {
 
 	e.GET("/", hello)
 	e.POST("/", quickExec)
-	e.POST("/procedure/search", procedureSearch)
+	e.POST("/procedure/search", procedureSearch, MustBeAdminMiddleware())
 	e.POST("/procedure/:key", procedureSave, MustBeAdminMiddleware())
 	e.DELETE("/procedure/:key", procedureDelete, MustBeAdminMiddleware())
 	e.GET("/procedure/:key/result", procedureExec)
