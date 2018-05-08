@@ -96,6 +96,7 @@ exports.example = body
 ### # `utils.bcryptCheck(string hashed, string real)`
 ### # `utils.fetch(Object args)`
 ### # `globals` `Object`
+### # `request` `Object`
 
 
 RESTful API [![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/dac8c42fcce004c6c7e8)
