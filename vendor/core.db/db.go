@@ -1,12 +1,17 @@
 package db
 
 import (
+	"encoding/json"
+	"sync"
+
 	"github.com/blevesearch/bleve"
 )
 
 // DB the database object
 type DB struct {
-	index bleve.Index
+	index   bleve.Index
+	globals map[string]interface{}
+	gl      sync.RWMutex
 }
 
 // Open opens the specified database
@@ -21,7 +26,9 @@ func Open(dbname string) (*DB, error) {
 	}
 	db := &DB{
 		index: index,
+		gl:    sync.RWMutex{},
 	}
+	db.globals = db.GlobalsLoad()
 	return db, nil
 }
 
@@ -69,4 +76,28 @@ func (db *DB) Find(q string, sortby []string, offset, limit int) (*Result, error
 		MaxScore: searchResults.MaxScore,
 		Took:     searchResults.Took,
 	}, nil
+}
+
+// GlobalsSet set global var(s)
+func (db *DB) GlobalsSet(data map[string]interface{}) {
+	db.gl.Lock()
+	defer db.gl.Unlock()
+	for k, v := range data {
+		db.globals[k] = v
+	}
+	j, _ := json.Marshal(db.globals)
+	db.index.SetInternal([]byte("internals/vars/globals"), j)
+}
+
+// GlobalsLoad freshly load the globals
+func (db *DB) GlobalsLoad() map[string]interface{} {
+	vars := map[string]interface{}{}
+	data, _ := db.index.GetInternal([]byte("internals/vars/globals"))
+	json.Unmarshal(data, &vars)
+	return vars
+}
+
+// GlobalsGet get the globals from the cache
+func (db *DB) GlobalsGet() map[string]interface{} {
+	return db.globals
 }

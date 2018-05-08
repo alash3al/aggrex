@@ -143,3 +143,29 @@ func procedureDelete(c echo.Context) error {
 		"success": true,
 	})
 }
+
+// globalsSet .
+func globalsSet(c echo.Context) error {
+	var vars map[string]interface{}
+	if err := c.Bind(&vars); err != nil {
+		return c.JSON(422, map[string]interface{}{
+			"success": false,
+			"errors": []string{
+				err.Error(),
+			},
+		})
+	}
+	globals.DBHandler.GlobalsSet(vars)
+	return c.JSON(200, map[string]interface{}{
+		"success": true,
+		"data":    globals.DBHandler.GlobalsGet(),
+	})
+}
+
+// globalsGet .
+func globalsGet(c echo.Context) error {
+	return c.JSON(200, map[string]interface{}{
+		"success": true,
+		"data":    globals.DBHandler.GlobalsGet(),
+	})
+}

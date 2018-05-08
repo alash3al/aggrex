@@ -9,6 +9,8 @@ import (
 	"strings"
 	"time"
 
+	"core.globals"
+
 	"github.com/go-resty/resty"
 	"github.com/robertkrimen/otto"
 	// _ "github.com/robertkrimen/otto/underscore"
@@ -60,6 +62,7 @@ func (v *VM) Exec(script string) (interface{}, error) {
 		headers[k] = v[0]
 	}
 
+	vm.Set("globals", globals.DBHandler.GlobalsGet())
 	vm.Set("exports", map[string]interface{}{})
 	vm.Set("fetch", v.funcFetch)
 	vm.Set("request", map[string]interface{}{
