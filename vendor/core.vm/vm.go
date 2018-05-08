@@ -1,6 +1,11 @@
 package vm
 
 import (
+	"crypto/md5"
+	"crypto/rand"
+	"crypto/sha256"
+	"crypto/sha512"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -9,8 +14,11 @@ import (
 	"strings"
 	"time"
 
+	"golang.org/x/crypto/bcrypt"
+
 	"core.globals"
 
+	"github.com/clbanning/mxj"
 	"github.com/go-resty/resty"
 	"github.com/robertkrimen/otto"
 	// _ "github.com/robertkrimen/otto/underscore"
@@ -62,9 +70,9 @@ func (v *VM) Exec(script string) (interface{}, error) {
 		headers[k] = v[0]
 	}
 
-	vm.Set("globals", globals.DBHandler.GlobalsGet())
 	vm.Set("exports", map[string]interface{}{})
 	vm.Set("fetch", v.funcFetch)
+	vm.Set("globals", globals.DBHandler.GlobalsGet())
 	vm.Set("request", map[string]interface{}{
 		"uri":         v.Request.URL.RequestURI(),
 		"proto":       v.Request.Proto,
@@ -72,6 +80,37 @@ func (v *VM) Exec(script string) (interface{}, error) {
 		"remote_addr": v.Request.RemoteAddr,
 		"query":       queryParams,
 		"headers":     headers,
+	})
+	vm.Set("utils", map[string]interface{}{
+		"btoa": func(s string) string {
+			return base64.StdEncoding.EncodeToString([]byte(s))
+		},
+		"atob": func(s string) string {
+			b, _ := base64.StdEncoding.DecodeString(s)
+			return string(b)
+		},
+		"uniqid": func(l int) string {
+			b := make([]byte, l)
+			rand.Read(b)
+			return fmt.Sprintf("%x", b)
+		},
+		"md5": func(s string) string {
+			return fmt.Sprintf("%x", md5.Sum([]byte(s)))
+		},
+		"sha256": func(s string) string {
+			return fmt.Sprintf("%x", sha256.Sum256([]byte(s)))
+		},
+		"sha512": func(s string) string {
+			return fmt.Sprintf("%x", sha512.Sum512([]byte(s)))
+		},
+		"bcrypt": func(s string) string {
+			b, _ := bcrypt.GenerateFromPassword([]byte(s), 9)
+			return string(b)
+		},
+		"bcryptCheck": func(h, s string) bool {
+			return bcrypt.CompareHashAndPassword([]byte(h), []byte(s)) == nil
+		},
+		"fetch": v.funcFetch,
 	})
 
 	val, err := vm.Eval(script)
@@ -87,7 +126,7 @@ func (v *VM) Exec(script string) (interface{}, error) {
 
 // funcFetch .
 func (v *VM) funcFetch(args map[string]interface{}) map[string]interface{} {
-	target, method := "", ""
+	target, proxy, method := "", "", ""
 	headers := map[string]string{}
 
 	if args["url"] == nil {
@@ -117,20 +156,31 @@ func (v *VM) funcFetch(args map[string]interface{}) map[string]interface{} {
 		}
 	}
 
+	if args["proxy"] != nil {
+		proxy = args["proxy"].(string)
+	}
+
 	body := args["body"]
 
-	resp, err := resty.SetTimeout(time.Duration(v.MaxExecTime)*time.Second).R().SetHeaders(headers).SetBody(body).Execute(method, target)
+	client := resty.SetTimeout(time.Duration(v.MaxExecTime) * time.Second)
+	if proxy != "" {
+		client.SetProxy(proxy)
+	}
+	resp, err := client.R().SetHeaders(headers).SetBody(body).Execute(method, target)
 	if err != nil {
 		log.Println("[fetch]", err.Error())
 		return nil
 	}
 
 	var respBody interface{}
+
 	if strings.Contains(strings.ToLower(resp.Header().Get("Content-Type")), "application/json") {
 		err := json.Unmarshal(resp.Body(), &respBody)
 		if err != nil {
 			respBody = string(resp.Body())
 		}
+	} else if m, err := mxj.NewMapXml(resp.Body()); err == nil {
+		respBody = m
 	} else {
 		respBody = string(resp.Body())
 	}

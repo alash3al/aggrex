@@ -86,6 +86,18 @@ var body = resp.body
 exports.example = body
 ```
 
+### # `utils.btoa(string)`
+### # `utils.atob(string)`
+### # `utils.uniqid(integer length)`
+### # `utils.md5(string)`
+### # `utils.sha256(string)`
+### # `utils.sha512(string)`
+### # `utils.bcrypt(string)`
+### # `utils.bcryptCheck(string hashed, string real)`
+### # `utils.fetch(Object args)`
+### # `globals` `Object`
+
+
 RESTful API [![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/dac8c42fcce004c6c7e8)
 =============
 > Goto the postman [documenter]](https://documenter.getpostman.com/view/2408647/aggrex/RW1aJfJ8)
