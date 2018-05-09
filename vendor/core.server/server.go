@@ -24,6 +24,7 @@ func Serve(addr string) error {
 	e.POST("/procedure/:key", procedureSave, MustBeAdminMiddleware())
 	e.DELETE("/procedure/:key", procedureDelete, MustBeAdminMiddleware())
 	e.GET("/procedure/:key/result", procedureExec)
+	e.POST("/procedure/:key/result", procedureExec)
 	e.POST("/globals/vars", globalsSet, MustBeAdminMiddleware())
 	e.GET("/globals/vars", globalsGet, MustBeAdminMiddleware())
 

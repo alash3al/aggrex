@@ -8,6 +8,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
@@ -62,6 +63,7 @@ func (v *VM) Exec(script string) (interface{}, error) {
 		}
 		queryParams[k] = v[0]
 	}
+
 	headers := map[string]string{}
 	for k, v := range v.Request.Header {
 		if len(v) < 1 {
@@ -70,9 +72,19 @@ func (v *VM) Exec(script string) (interface{}, error) {
 		headers[k] = v[0]
 	}
 
+	var inBody interface{}
+
+	if v.Request.Method == "POST" {
+		json.NewDecoder(io.LimitReader(v.Request.Body, (*globals.FlagMaxBodySize)*1024*1024)).Decode(&inBody)
+		if v.Request.Body != nil {
+			v.Request.Body.Close()
+		}
+	}
+
 	vm.Set("exports", map[string]interface{}{})
 	vm.Set("fetch", v.funcFetch)
 	vm.Set("globals", globals.DBHandler.GlobalsGet())
+
 	vm.Set("request", map[string]interface{}{
 		"uri":         v.Request.URL.RequestURI(),
 		"proto":       v.Request.Proto,
@@ -80,7 +92,9 @@ func (v *VM) Exec(script string) (interface{}, error) {
 		"remote_addr": v.Request.RemoteAddr,
 		"query":       queryParams,
 		"headers":     headers,
+		"body":        inBody,
 	})
+
 	vm.Set("utils", map[string]interface{}{
 		"btoa": func(s string) string {
 			return base64.StdEncoding.EncodeToString([]byte(s))
@@ -117,16 +131,19 @@ func (v *VM) Exec(script string) (interface{}, error) {
 	if err != nil {
 		return val, err
 	}
+
 	exports, err := vm.Get("exports")
 	if err != nil {
 		return nil, err
 	}
+
 	return exports.Export()
 }
 
 // funcFetch .
 func (v *VM) funcFetch(args map[string]interface{}) map[string]interface{} {
 	target, proxy, method := "", "", ""
+	redirCount := 5
 	headers := map[string]string{}
 
 	if args["url"] == nil {
@@ -149,6 +166,10 @@ func (v *VM) funcFetch(args map[string]interface{}) map[string]interface{} {
 		method = "GET"
 	}
 
+	if args["redirects"] != nil {
+		redirCount = args["redirects"].(int)
+	}
+
 	if args["headers"] != nil {
 		hdrs := args["headers"].(map[string]interface{})
 		for k, v := range hdrs {
@@ -162,14 +183,25 @@ func (v *VM) funcFetch(args map[string]interface{}) map[string]interface{} {
 
 	body := args["body"]
 
-	client := resty.SetTimeout(time.Duration(v.MaxExecTime) * time.Second)
+	client := resty.New()
+	client.SetTimeout(time.Duration(v.MaxExecTime) * time.Second)
+
 	if proxy != "" {
 		client.SetProxy(proxy)
 	}
+
+	client.SetRedirectPolicy(resty.FlexibleRedirectPolicy(redirCount))
+
 	resp, err := client.R().SetHeaders(headers).SetBody(body).Execute(method, target)
 	if err != nil {
 		log.Println("[fetch]", err.Error())
-		return nil
+		return map[string]interface{}{
+			"statusCode": resp.StatusCode(),
+			"headers":    resp.Header(),
+			"size":       resp.Size(),
+			"body":       nil,
+			"error":      err.Error(),
+		}
 	}
 
 	var respBody interface{}
@@ -190,6 +222,7 @@ func (v *VM) funcFetch(args map[string]interface{}) map[string]interface{} {
 		"headers":    resp.Header(),
 		"size":       resp.Size(),
 		"body":       respBody,
+		"error":      nil,
 	}
 }
 

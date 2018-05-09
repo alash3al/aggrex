@@ -74,6 +74,8 @@ var resp = fetch({
     headers: {                  // the request headers
         "key": "value"
     },
+    proxy: "",                  // the proxy to be used
+    redirects: 5,               // the maximum redirects count
     body: ""                    // the request body (anything to be sent i.e 'string', 'object' ... etc)
 })
 
@@ -95,8 +97,16 @@ exports.example = body
 ### # `utils.bcrypt(string)`
 ### # `utils.bcryptCheck(string hashed, string real)`
 ### # `utils.fetch(Object args)`
+
+### # `requests.headers` `Object`
+### # `requests.query` `Object`
+### # `requests.body` `Object`
+### # `requests.host` `String`
+### # `requests.proto` `String`
+### # `requests.remote_addr` `String`
+### # `requests.uri` `String`
+
 ### # `globals` `Object`
-### # `request` `Object`
 
 
 RESTful API [![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/dac8c42fcce004c6c7e8)
