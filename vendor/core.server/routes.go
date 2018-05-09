@@ -48,10 +48,7 @@ func quickExec(c echo.Context) error {
 			"error":   vm.LastError,
 		})
 	}
-	return c.JSON(200, map[string]interface{}{
-		"success": true,
-		"data":    result,
-	})
+	return c.JSON(200, result)
 }
 
 // procedureSave .
@@ -130,10 +127,7 @@ func procedureExec(c echo.Context) error {
 			"error":   vm.LastError,
 		})
 	}
-	return c.JSON(200, map[string]interface{}{
-		"success": true,
-		"data":    result,
-	})
+	return c.JSON(200, result)
 }
 
 // procedureDelete .
