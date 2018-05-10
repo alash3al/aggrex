@@ -43,7 +43,7 @@ func quickExec(c echo.Context) error {
 		})
 	}
 	if result == nil && vm.LastError != nil {
-		return c.JSON(408, map[string]interface{}{
+		return c.JSON(500, map[string]interface{}{
 			"success": false,
 			"error":   vm.LastError,
 		})
@@ -138,8 +138,8 @@ func procedureDelete(c echo.Context) error {
 	})
 }
 
-// globalsSet .
-func globalsSet(c echo.Context) error {
+// globalsGetVars .
+func globalsSetVars(c echo.Context) error {
 	var vars map[string]interface{}
 	if err := c.Bind(&vars); err != nil {
 		return c.JSON(422, map[string]interface{}{
@@ -156,8 +156,24 @@ func globalsSet(c echo.Context) error {
 	})
 }
 
-// globalsGet .
-func globalsGet(c echo.Context) error {
+// globalsGetVars .
+func globalsGetVars(c echo.Context) error {
+	return c.JSON(200, map[string]interface{}{
+		"success": true,
+		"data":    globals.DBHandler.GlobalsGet(),
+	})
+}
+
+// globalSetVar .
+func globalsSetVar(c echo.Context) error {
+	var input interface{}
+
+	c.Bind(&input)
+
+	globals.DBHandler.GlobalsSet(map[string]interface{}{
+		c.Param("key"): input,
+	})
+
 	return c.JSON(200, map[string]interface{}{
 		"success": true,
 		"data":    globals.DBHandler.GlobalsGet(),

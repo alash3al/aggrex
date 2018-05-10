@@ -32,7 +32,8 @@ var (
 	// FlagAdminToken .
 	FlagAdminToken = flag.String("admin-token", xid.New().String(), "the admin secret token")
 
-	FlagBodyMaxSize = flag.Int("body-max-size", 5, "maximum body size in megabytes")
+	// FlagBodyMaxSize .
+	FlagBodyMaxSize = flag.String("body-max-size", "5M", "maximum body size in megabytes")
 )
 
 var (

@@ -8,7 +8,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
 	"net/url"
@@ -75,7 +74,7 @@ func (v *VM) Exec(script string) (interface{}, error) {
 	var inBody interface{}
 
 	if v.Request.Method == "POST" {
-		json.NewDecoder(io.LimitReader(v.Request.Body, (*globals.FlagMaxBodySize)*1024*1024)).Decode(&inBody)
+		json.NewDecoder(v.Request.Body).Decode(&inBody)
 		if v.Request.Body != nil {
 			v.Request.Body.Close()
 		}
@@ -147,17 +146,35 @@ func (v *VM) funcFetch(args map[string]interface{}) map[string]interface{} {
 	headers := map[string]string{}
 
 	if args["url"] == nil {
-		return nil
+		return map[string]interface{}{
+			"statusCode": 500,
+			"headers":    nil,
+			"size":       0,
+			"body":       nil,
+			"error":      "empty url",
+		}
 	}
 
 	target = args["url"].(string)
 
 	parsedURL, err := url.Parse(target)
 	if err != nil {
-		return nil
+		return map[string]interface{}{
+			"statusCode": 500,
+			"headers":    nil,
+			"size":       0,
+			"body":       nil,
+			"error":      err.Error(),
+		}
 	}
 	if !v.isAllowedHost(parsedURL.Host, v.AllowedHosts) {
-		return nil
+		return map[string]interface{}{
+			"statusCode": 500,
+			"headers":    nil,
+			"size":       0,
+			"body":       nil,
+			"error":      "The requested host isn't allowed",
+		}
 	}
 
 	if args["method"] != nil {
@@ -194,7 +211,6 @@ func (v *VM) funcFetch(args map[string]interface{}) map[string]interface{} {
 
 	resp, err := client.R().SetHeaders(headers).SetBody(body).Execute(method, target)
 	if err != nil {
-		log.Println("[fetch]", err.Error())
 		return map[string]interface{}{
 			"statusCode": resp.StatusCode(),
 			"headers":    resp.Header(),
