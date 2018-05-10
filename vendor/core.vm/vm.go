@@ -167,6 +167,7 @@ func (v *VM) funcFetch(args map[string]interface{}) map[string]interface{} {
 			"error":      err.Error(),
 		}
 	}
+
 	if !v.isAllowedHost(parsedURL.Host, v.AllowedHosts) {
 		return map[string]interface{}{
 			"statusCode": 500,
