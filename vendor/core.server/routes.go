@@ -166,12 +166,10 @@ func globalsGetVars(c echo.Context) error {
 
 // globalSetVar .
 func globalsSetVar(c echo.Context) error {
-	var input interface{}
-
-	c.Bind(&input)
+	input, _ := ioutil.ReadAll(c.Request().Body)
 
 	globals.DBHandler.GlobalsSet(map[string]interface{}{
-		c.Param("key"): input,
+		c.Param("key"): string(input),
 	})
 
 	return c.JSON(200, map[string]interface{}{
