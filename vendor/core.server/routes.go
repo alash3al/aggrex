@@ -177,3 +177,22 @@ func globalsSetVar(c echo.Context) error {
 		"data":    globals.DBHandler.GlobalsGet(),
 	})
 }
+
+// globalsUnsetVars .
+func globalsUnsetVars(c echo.Context) error {
+	var keys []string
+
+	if err := c.Bind(&keys); err != nil {
+		return c.JSON(400, map[string]interface{}{
+			"success": false,
+			"data":    err.Error(),
+		})
+	}
+
+	globals.DBHandler.GlobalsUnset(keys)
+
+	return c.JSON(200, map[string]interface{}{
+		"success": true,
+		"data":    globals.DBHandler.GlobalsGet(),
+	})
+}

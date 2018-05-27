@@ -25,11 +25,11 @@ func Serve(addr string) error {
 	e.POST("/procedure/search", procedureSearch, MustBeAdminMiddleware())
 	e.POST("/procedure/:key", procedureSave, MustBeAdminMiddleware())
 	e.DELETE("/procedure/:key", procedureDelete, MustBeAdminMiddleware())
-	e.GET("/procedure/:key/result", procedureExec)
-	e.POST("/procedure/:key/result", procedureExec)
+	e.Any("/procedure/:key/result", procedureExec)
 	e.POST("/globals/vars", globalsSetVars, MustBeAdminMiddleware())
 	e.POST("/globals/var/:key", globalsSetVar, MustBeAdminMiddleware())
 	e.GET("/globals/vars", globalsGetVars, MustBeAdminMiddleware())
+	e.DELETE("/globals/vars", globalsUnsetVars, MustBeAdminMiddleware())
 
 	return e.Start(addr)
 }

@@ -101,3 +101,13 @@ func (db *DB) GlobalsLoad() map[string]interface{} {
 func (db *DB) GlobalsGet() map[string]interface{} {
 	return db.globals
 }
+
+// GlobalsUnset unset the specified key(s) from the globals
+func (db *DB) GlobalsUnset(keys []string) {
+	vars := db.GlobalsGet()
+	for _, k := range keys {
+		delete(vars, k)
+		delete(db.globals, k)
+	}
+	db.GlobalsSet(vars)
+}

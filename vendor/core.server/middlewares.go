@@ -11,7 +11,7 @@ import (
 // MustBeAdminMiddleware .
 func MustBeAdminMiddleware() echo.MiddlewareFunc {
 	return middleware.KeyAuth(func(key string, c echo.Context) (ok bool, err error) {
-		ok = key == *globals.FlagAdminToken
+		ok = (key == *globals.FlagAdminToken) || (*globals.FlagAdminToken == "")
 		if !ok {
 			err = errors.New("Invalid Admin token specified")
 		}
