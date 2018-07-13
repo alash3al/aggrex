@@ -21,7 +21,7 @@ import (
 	"github.com/clbanning/mxj"
 	"github.com/go-resty/resty"
 	"github.com/robertkrimen/otto"
-	// _ "github.com/robertkrimen/otto/underscore"
+	_ "github.com/robertkrimen/otto/underscore"
 )
 
 // VM .
@@ -45,6 +45,8 @@ func (v *VM) Exec(script string) (interface{}, error) {
 			log.Println("[Panic]", err)
 		}
 	}()
+
+	script = `var collect = _; utils.collect = collect;` + script
 
 	vm := otto.New()
 	vm.Interrupt = make(chan func(), 1)

@@ -97,6 +97,7 @@ exports.example = body
 ### # `utils.bcrypt(string)`
 ### # `utils.bcryptCheck(string hashed, string real)`
 ### # `utils.fetch(Object args)`
+### # `utils.collect()`, `underscore.js`
 
 ### # `requests.headers` `Object`
 ### # `requests.query` `Object`
