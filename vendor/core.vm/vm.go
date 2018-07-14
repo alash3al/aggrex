@@ -58,27 +58,33 @@ func (v *VM) Exec(script string) (interface{}, error) {
 	})
 
 	queryParams := map[string]string{}
-	for k, v := range v.Request.URL.Query() {
-		if len(v) < 1 {
-			continue
+	if v.Request != nil {
+		for k, v := range v.Request.URL.Query() {
+			if len(v) < 1 {
+				continue
+			}
+			queryParams[k] = v[0]
 		}
-		queryParams[k] = v[0]
 	}
 
 	headers := map[string]string{}
-	for k, v := range v.Request.Header {
-		if len(v) < 1 {
-			continue
+	if v.Request != nil {
+		for k, v := range v.Request.Header {
+			if len(v) < 1 {
+				continue
+			}
+			headers[k] = v[0]
 		}
-		headers[k] = v[0]
 	}
 
 	var inBody interface{}
 
-	if v.Request.Method == "POST" {
-		json.NewDecoder(v.Request.Body).Decode(&inBody)
-		if v.Request.Body != nil {
-			v.Request.Body.Close()
+	if v.Request != nil {
+		if v.Request.Method == "POST" {
+			json.NewDecoder(v.Request.Body).Decode(&inBody)
+			if v.Request.Body != nil {
+				v.Request.Body.Close()
+			}
 		}
 	}
 
@@ -86,15 +92,19 @@ func (v *VM) Exec(script string) (interface{}, error) {
 	vm.Set("fetch", v.funcFetch)
 	vm.Set("globals", globals.DBHandler.GlobalsGet())
 
-	vm.Set("request", map[string]interface{}{
-		"uri":         v.Request.URL.RequestURI(),
-		"proto":       v.Request.Proto,
-		"host":        v.Request.Host,
-		"remote_addr": v.Request.RemoteAddr,
-		"query":       queryParams,
-		"headers":     headers,
-		"body":        inBody,
-	})
+	if v.Request != nil {
+		vm.Set("request", map[string]interface{}{
+			"uri":         v.Request.URL.RequestURI(),
+			"proto":       v.Request.Proto,
+			"host":        v.Request.Host,
+			"remote_addr": v.Request.RemoteAddr,
+			"query":       queryParams,
+			"headers":     headers,
+			"body":        inBody,
+		})
+	} else {
+		vm.Set("request", map[string]interface{}{})
+	}
 
 	vm.Set("utils", map[string]interface{}{
 		"btoa": func(s string) string {
@@ -126,6 +136,12 @@ func (v *VM) Exec(script string) (interface{}, error) {
 			return bcrypt.CompareHashAndPassword([]byte(h), []byte(s)) == nil
 		},
 		"fetch": v.funcFetch,
+	})
+
+	vm.Set("cron", map[string]interface{}{
+		"list":  globals.DBHandler.CronsGet,
+		"set":   globals.DBHandler.CronsSet,
+		"unset": globals.DBHandler.CronsUnset,
 	})
 
 	val, err := vm.Eval(script)

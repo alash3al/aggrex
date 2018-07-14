@@ -1,6 +1,7 @@
 package db
 
 import (
+	// "core.vm"
 	"encoding/json"
 	"sync"
 
@@ -9,9 +10,12 @@ import (
 
 // DB the database object
 type DB struct {
-	index   bleve.Index
-	globals map[string]interface{}
-	gl      sync.RWMutex
+	index      bleve.Index
+	globals    map[string]interface{}
+	gl         sync.RWMutex
+	crons      map[string]*Cron
+	cl         sync.RWMutex
+	CronReload chan int
 }
 
 // Open opens the specified database
@@ -29,6 +33,9 @@ func Open(dbname string) (*DB, error) {
 		gl:    sync.RWMutex{},
 	}
 	db.globals = db.GlobalsLoad()
+	db.crons = db.CronsLoad()
+	db.cl = sync.RWMutex{}
+	db.CronReload = make(chan int)
 	return db, nil
 }
 
@@ -110,4 +117,47 @@ func (db *DB) GlobalsUnset(keys []string) {
 		delete(db.globals, k)
 	}
 	db.GlobalsSet(vars)
+}
+
+// CronsLoad list all cron jobs
+func (db *DB) CronsLoad() map[string]*Cron {
+	crons := map[string]*Cron{}
+	data, _ := db.index.GetInternal([]byte("internals/crons"))
+	json.Unmarshal(data, &crons)
+	return crons
+}
+
+// CronsSet set a cron-job
+func (db *DB) CronsSet(key, interval, fn string) error {
+	db.cl.Lock()
+	defer db.cl.Unlock()
+	defer db.CronsRun()
+	db.crons[key] = &Cron{
+		Interval: interval,
+		Job:      fn,
+	}
+	j, _ := json.Marshal(db.crons)
+	return db.index.SetInternal([]byte("internals/crons"), j)
+}
+
+// CronsUnset unset a cron-job
+func (db *DB) CronsUnset(key string) error {
+	db.cl.Lock()
+	defer db.cl.Unlock()
+	defer db.CronsRun()
+	delete(db.crons, key)
+	j, _ := json.Marshal(db.crons)
+	return db.index.SetInternal([]byte("internals/crons"), j)
+}
+
+// CronsGet get the cached crons
+func (db *DB) CronsGet() map[string]*Cron {
+	return db.crons
+}
+
+// CronsRun runs the crons kernel
+func (db *DB) CronsRun() {
+	go func() {
+		db.CronReload <- 1
+	}()
 }

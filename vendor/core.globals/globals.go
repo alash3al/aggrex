@@ -4,6 +4,7 @@ import (
 	"flag"
 	"path"
 
+	"github.com/robfig/cron"
 	"github.com/rs/xid"
 
 	db "core.db"
@@ -39,6 +40,9 @@ var (
 var (
 	// DBHandler .
 	DBHandler *db.DB
+
+	// CronKernel .
+	CronKernel *cron.Cron
 )
 
 // PopulateGlobals .

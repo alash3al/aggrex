@@ -107,6 +107,10 @@ exports.example = body
 ### # `requests.remote_addr` `String`
 ### # `requests.uri` `String`
 
+### # `cron.set(string key, string interval, closure job)`
+### # `cron.unset(string key)`
+### # `cron.list() Object`
+
 ### # `globals` `Object`
 
 
