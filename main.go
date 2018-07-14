@@ -4,11 +4,13 @@ import (
 	"log"
 	"strings"
 
-	db "core.db"
+	"core.db"
 	"core.globals"
 	"core.server"
-	vm "core.vm"
+	"core.vm"
+
 	_ "github.com/robertkrimen/otto/underscore"
+
 	"github.com/robfig/cron"
 )
 
@@ -23,6 +25,7 @@ func main() {
 		log.Fatal("[DB]", err.Error())
 	}
 	globals.DBHandler = dbh
+
 	globals.CronKernel = cron.New()
 
 	go (func() {
