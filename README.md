@@ -116,7 +116,7 @@ exports.example = body
 
 RESTful API [![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/dac8c42fcce004c6c7e8)
 =============
-> Goto the postman [documenter]](https://documenter.getpostman.com/view/2408647/aggrex/RW1aJfJ8)
+> Goto the postman [documenter](https://documenter.getpostman.com/view/2408647/aggrex/RW1aJfJ8)
 
 Contribution
 ============
